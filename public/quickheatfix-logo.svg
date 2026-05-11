@@ -1,0 +1,18 @@
+<svg width="500" height="136" viewBox="0 0 500 136" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ring" x1="16" y1="16" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1D4ED8"/>
+      <stop offset="1" stop-color="#1237A8"/>
+    </linearGradient>
+    <linearGradient id="core" x1="40" y1="30" x2="94" y2="94" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFB347"/>
+      <stop offset="1" stop-color="#D86300"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="10" width="112" height="112" rx="28" fill="#FFF8EB"/>
+  <circle cx="64" cy="64" r="32" stroke="url(#ring)" stroke-width="12"/>
+  <path d="M80 84L93 97" stroke="url(#ring)" stroke-width="12" stroke-linecap="round"/>
+  <path d="M65 36L54 58H68L56 90L79 59H64L75 36H65Z" fill="url(#core)"/>
+  <text x="150" y="70" fill="#1B2231" font-size="48" font-family="Playfair Display, Georgia, serif" font-weight="700">QuickHeatFix</text>
+  <text x="152" y="101" fill="#5B6271" font-size="22" font-family="Work Sans, Arial, sans-serif">Water Heater Repair and Replacement</text>
+</svg>
