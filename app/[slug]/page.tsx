@@ -11,6 +11,7 @@ import {
   buildKeywordSentence,
   buildMeta,
   buildSchemas,
+  buildServiceLinkLabel,
   getAreaLabel,
   getCityPagesForLinking,
   getCrossServiceLinksForCity,
@@ -120,10 +121,10 @@ export default async function WaterHeaterLandingPage({ params }: PageProps) {
             <h2>Quick Navigator</h2>
             <p>Use these links if you want to compare options before calling.</p>
             <div className="qhf-mini-links">
-              {relevantPillar ? <Link href={`/${relevantPillar.slug}`}>{buildH1(relevantPillar)}</Link> : null}
+              {relevantPillar ? <Link href={`/${relevantPillar.slug}`}>{buildServiceLinkLabel(relevantPillar)}</Link> : null}
               {cityLinkTargets.slice(0, 3).map((item) => (
                 <Link key={item.slug} href={`/${item.slug}`}>
-                  {buildH1(item)}
+                  {buildServiceLinkLabel(item)}
                 </Link>
               ))}
             </div>
@@ -232,7 +233,7 @@ export default async function WaterHeaterLandingPage({ params }: PageProps) {
               <h2 className="qhf-title">Cross-service links for the same city</h2>
             </div>
             <div className="qhf-related-links qhf-location-grid">
-              {relevantPillar ? <Link href={`/${relevantPillar.slug}`}>{buildH1(relevantPillar)}</Link> : null}
+              {relevantPillar ? <Link href={`/${relevantPillar.slug}`}>{buildServiceLinkLabel(relevantPillar)}</Link> : null}
               {crossServiceLinks.map((link) => (
                 <Link key={link.href} href={link.href}>
                   {link.anchor}
@@ -251,10 +252,10 @@ export default async function WaterHeaterLandingPage({ params }: PageProps) {
               <h2 className="qhf-title">Continue to related services in your area</h2>
             </div>
             <div className="qhf-related-links qhf-location-grid">
-              {relevantPillar ? <Link href={`/${relevantPillar.slug}`}>{buildH1(relevantPillar)}</Link> : null}
+              {relevantPillar ? <Link href={`/${relevantPillar.slug}`}>{buildServiceLinkLabel(relevantPillar)}</Link> : null}
               {cityLinkTargets.map((item) => (
                 <Link key={item.slug} href={`/${item.slug}`}>
-                  {buildH1(item)}
+                  {buildServiceLinkLabel(item)}
                 </Link>
               ))}
             </div>
@@ -272,7 +273,7 @@ export default async function WaterHeaterLandingPage({ params }: PageProps) {
             <div className="qhf-related-links qhf-location-grid">
               {pillarCityLinks.map((item) => (
                 <Link key={item.slug} href={`/${item.slug}`}>
-                  {buildH1(item)}
+                  {buildServiceLinkLabel(item)}
                 </Link>
               ))}
             </div>
@@ -290,7 +291,7 @@ export default async function WaterHeaterLandingPage({ params }: PageProps) {
             <div className="qhf-related-links qhf-location-grid">
               {relatedPages.map((item) => (
                 <Link key={item.slug} href={`/${item.slug}`}>
-                  {buildH1(item)}
+                  {buildServiceLinkLabel(item)}
                 </Link>
               ))}
             </div>
@@ -302,7 +303,7 @@ export default async function WaterHeaterLandingPage({ params }: PageProps) {
         <div className="qhf-container qhf-faq-shell">
           <header>
             <p className="qhf-eyebrow">FAQs</p>
-            <h2 className="qhf-title">Common questions about {pageH1.toLowerCase()}</h2>
+            <h2 className="qhf-title">Common questions before booking</h2>
           </header>
           <div className="qhf-faq-grid">
             {faqs.map((faq) => (

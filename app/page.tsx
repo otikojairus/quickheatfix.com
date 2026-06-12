@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { JsonLd } from "@/components/json-ld";
 import { PhoneLink } from "@/components/phone-link";
-import { WATER_HEATER_PAGES, buildH1, getTopPriorityPages } from "@/lib/waterheater-data";
+import { WATER_HEATER_PAGES, buildServiceLinkLabel, getTopPriorityPages } from "@/lib/waterheater-data";
 import { EMERGENCY_PHONE_DISPLAY, EMERGENCY_PHONE_E164, SITE_NAME, absoluteUrl } from "@/lib/seo";
 
 const HOME_STEPS = [
@@ -22,7 +22,7 @@ const HOME_STEPS = [
 
 const HOME_FAQS = [
   {
-    question: "How fast can water heater repair calls be triaged?",
+    question: "How fast can calls be triaged?",
     answer:
       "Most calls are triaged immediately. Once we have symptom, city, and unit type, we can route to the right service path and reduce downtime faster.",
   },
@@ -118,7 +118,7 @@ export default function HomePage() {
             <div className="qhf-mini-links">
               {emergencyPages.map((page) => (
                 <Link key={page.slug} href={`/${page.slug}`}>
-                  {page.primaryKeyword}
+                  {buildServiceLinkLabel(page)}
                 </Link>
               ))}
             </div>
@@ -152,7 +152,7 @@ export default function HomePage() {
         <div className="qhf-location-grid qhf-priority-grid">
           {topPages.map((page) => (
             <Link key={page.slug} href={`/${page.slug}`} className="qhf-priority-link">
-              {buildH1(page)}
+              {buildServiceLinkLabel(page)}
             </Link>
           ))}
         </div>
@@ -169,7 +169,7 @@ export default function HomePage() {
         <div className="qhf-link-grid">
           {servicePillars.map((page) => (
             <Link key={page.slug} href={`/${page.slug}`} className="qhf-link-card">
-              <h3>{page.primaryKeyword}</h3>
+              <h3>{buildServiceLinkLabel(page)}</h3>
               <p>Compare this service across Canada, then select the city that matches your home.</p>
             </Link>
           ))}

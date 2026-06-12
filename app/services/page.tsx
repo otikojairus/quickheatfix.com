@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { JsonLd } from "@/components/json-ld";
 import { PhoneLink } from "@/components/phone-link";
-import { PAGE_TYPES, WATER_HEATER_PAGES, buildH1, getPagesByType } from "@/lib/waterheater-data";
+import { WATER_HEATER_PAGES, buildServiceLinkLabel, getPagesByType, parseArea } from "@/lib/waterheater-data";
 import { EMERGENCY_PHONE_DISPLAY, SITE_NAME, absoluteUrl } from "@/lib/seo";
 
 const SERVICES_FAQS = [
@@ -22,14 +22,49 @@ const SERVICES_FAQS = [
   },
 ] as const;
 
-function getFriendlyTypeLabel(pageType: string) {
-  if (pageType === "Service Pillar") return "Repair and Replacement Services";
-  if (pageType === "City Service Page") return "City-Specific Services";
-  if (pageType === "Emergency Landing") return "Emergency Help";
-  if (pageType === "Near Me Page") return "Nearby Service Options";
-  if (pageType === "Symptom Page") return "Problem-Based Help";
-  if (pageType === "Service Page") return "Specialized Services";
-  return pageType;
+const SERVICE_GROUPS = [
+  {
+    id: "urgent-help",
+    label: "Urgent help",
+    intro: "Fast paths for active leaks, full outages, and same-day replacement decisions.",
+    slugs: ["emergency-water-heater-repair", "emergency-hot-water-tank-replacement", "water-heater-leaking", "no-hot-water"],
+  },
+  {
+    id: "repair",
+    label: "Repair",
+    intro: "Diagnosis-first pages for standard, gas, electric, and tankless systems.",
+    slugs: ["water-heater-repair", "hot-water-tank-repair", "tankless-water-heater-repair", "gas-water-heater-repair", "electric-water-heater-repair"],
+  },
+  {
+    id: "replacement-installation",
+    label: "Replacement and installation",
+    intro: "Planning pages for new equipment, tankless conversions, and installation timing.",
+    slugs: ["water-heater-replacement", "hot-water-tank-replacement", "water-heater-installation", "tankless-water-heater-installation"],
+  },
+  {
+    id: "nearby-options",
+    label: "Nearby options",
+    intro: "Use these when you need help routed by location before comparing details.",
+    slugs: ["water-heater-repair-near-me", "water-heater-replacement-near-me", "water-heater-installation-near-me"],
+  },
+] as const;
+
+function getServiceGroupPages(slugs: readonly string[]) {
+  return slugs
+    .map((slug) => WATER_HEATER_PAGES.find((page) => page.slug === slug))
+    .filter((page): page is (typeof WATER_HEATER_PAGES)[number] => Boolean(page));
+}
+
+function getCityServiceEntryPages() {
+  const seen = new Set<string>();
+  return getPagesByType("City Service Page").filter((page) => {
+    const area = parseArea(page.targetArea);
+    if (area.kind !== "city" || seen.has(area.city)) {
+      return false;
+    }
+    seen.add(area.city);
+    return true;
+  });
 }
 
 export const metadata: Metadata = {
@@ -95,11 +130,12 @@ export default function ServicesPage() {
             <h2>Need A Quick Start?</h2>
             <p>Pick the help you need, then choose your city.</p>
             <div className="qhf-mini-links">
-              {PAGE_TYPES.map((type) => (
-                <a key={type} href={`#${type.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
-                  {getFriendlyTypeLabel(type)}
+              {SERVICE_GROUPS.map((group) => (
+                <a key={group.id} href={`#${group.id}`}>
+                  {group.label}
                 </a>
               ))}
+              <a href="#service-areas">Service areas</a>
             </div>
           </aside>
         </div>
@@ -115,41 +151,59 @@ export default function ServicesPage() {
 
       <section className="qhf-section">
         <div className="qhf-container qhf-index-stack">
-          {PAGE_TYPES.map((pageType) => {
-            const items = getPagesByType(pageType);
-            const id = pageType.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+          {SERVICE_GROUPS.map((group) => {
+            const items = getServiceGroupPages(group.slugs);
             return (
-              <article key={pageType} id={id} className="qhf-index-row">
+              <article key={group.id} id={group.id} className="qhf-index-row">
                 <header>
-                  <p className="qhf-eyebrow">{items.length} service options</p>
-                  <h2>{getFriendlyTypeLabel(pageType)}</h2>
+                  <h2>{group.label}</h2>
+                  <p>{group.intro}</p>
                 </header>
 
                 <div className="qhf-index-links qhf-location-grid">
                   {items.map((page) => (
                     <Link key={page.slug} href={`/${page.slug}`}>
-                      {buildH1(page)}
+                      {buildServiceLinkLabel(page)}
                     </Link>
                   ))}
                 </div>
               </article>
             );
           })}
+
+          <article id="service-areas" className="qhf-index-row">
+            <header>
+              <p className="qhf-eyebrow">Local pages</p>
+              <h2>Service areas</h2>
+              <p>Choose your city first, then compare the right repair, replacement, or installation path from there.</p>
+            </header>
+
+            <div className="qhf-index-links qhf-location-grid">
+              {getCityServiceEntryPages().map((page) => {
+                const area = parseArea(page.targetArea);
+                return (
+                  <Link key={page.slug} href={`/${page.slug}`}>
+                    {area.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </article>
         </div>
       </section>
 
       <section className="qhf-section qhf-soft-section">
         <div className="qhf-container qhf-related-wrap">
           <div>
-            <p className="qhf-eyebrow">More Ways To Get Help</p>
-            <h2 className="qhf-title">See all available water heater services</h2>
+            <p className="qhf-eyebrow">Common Starting Points</p>
+            <h2 className="qhf-title">Choose by situation, not by keyword</h2>
           </div>
           <div className="qhf-related-links qhf-location-grid">
-            {WATER_HEATER_PAGES.map((page) => (
-              <Link key={page.slug} href={`/${page.slug}`}>
-                {page.primaryKeyword}
-              </Link>
-            ))}
+            <a href="#urgent-help">I need urgent help</a>
+            <a href="#repair">I need a repair check</a>
+            <a href="#replacement-installation">I may need a new unit</a>
+            <a href="#nearby-options">I want nearby routing</a>
+            <a href="#service-areas">I want to pick my city</a>
           </div>
         </div>
       </section>

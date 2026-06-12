@@ -1,11 +1,21 @@
 import Link from "next/link";
 import { PhoneLink } from "@/components/phone-link";
-import { WATER_HEATER_PAGES, getCityPages } from "@/lib/waterheater-data";
+import { WATER_HEATER_PAGES, buildServiceLinkLabel, getCityPages, parseArea } from "@/lib/waterheater-data";
 import { EMERGENCY_PHONE_DISPLAY, SITE_NAME } from "@/lib/seo";
 
 export function SiteFooter() {
   const servicePillars = WATER_HEATER_PAGES.filter((page) => page.pageType === "Service Pillar");
-  const cityLinks = getCityPages().slice(0, 12);
+  const seenCities = new Set<string>();
+  const cityLinks = getCityPages()
+    .filter((page) => {
+      const area = parseArea(page.targetArea);
+      if (area.kind !== "city" || seenCities.has(area.city)) {
+        return false;
+      }
+      seenCities.add(area.city);
+      return true;
+    })
+    .slice(0, 12);
 
   return (
     <footer className="qhf-footer">
@@ -27,7 +37,7 @@ export function SiteFooter() {
             <div className="qhf-footer-links">
               {servicePillars.map((page) => (
                 <Link key={page.slug} href={`/${page.slug}`} className="qhf-footer-link">
-                  {page.primaryKeyword}
+                  {buildServiceLinkLabel(page)}
                 </Link>
               ))}
             </div>
@@ -36,11 +46,14 @@ export function SiteFooter() {
           <div>
             <h3 className="qhf-footer-title">Popular Cities</h3>
             <div className="qhf-footer-links qhf-location-grid">
-              {cityLinks.map((page) => (
-                <Link key={page.slug} href={`/${page.slug}`} className="qhf-footer-link">
-                  {page.primaryKeyword}
-                </Link>
-              ))}
+              {cityLinks.map((page) => {
+                const area = parseArea(page.targetArea);
+                return (
+                  <Link key={page.slug} href={`/${page.slug}`} className="qhf-footer-link">
+                    {area.label}
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </div>

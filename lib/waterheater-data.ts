@@ -5860,10 +5860,6 @@ function toTitleCase(input: string) {
     .join(" ");
 }
 
-function formatMoney(amount: number) {
-  return new Intl.NumberFormat("en-CA", { style: "currency", currency: "CAD", maximumFractionDigits: 0 }).format(amount);
-}
-
 function normalizeKeyword(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
 }
@@ -5925,6 +5921,27 @@ function parseServiceFamily(keyword: string) {
   if (normalized.includes("water heater repair")) return "water-heater-repair";
   if (normalized.includes("no hot water") || normalized.includes("not working") || normalized.includes("leaking") || normalized.includes("pressure relief valve")) return "water-heater-repair";
   return "water-heater-repair";
+}
+
+function serviceTopicLabel(page: WaterHeaterPage) {
+  const normalized = normalizeKeyword(page.primaryKeyword);
+
+  if (normalized.includes("emergency") && normalized.includes("replacement")) return "Emergency replacement";
+  if (normalized.includes("emergency")) return "Emergency repair";
+  if (normalized.includes("tankless") && normalized.includes("installation")) return "Tankless installation";
+  if (normalized.includes("tankless")) return "Tankless repair";
+  if (normalized.includes("hot water tank") && normalized.includes("replacement")) return "Tank replacement";
+  if (normalized.includes("hot water tank")) return "Tank repair";
+  if (normalized.includes("replacement")) return "Replacement";
+  if (normalized.includes("installation")) return "Installation";
+  if (normalized.includes("near me")) return "Nearby help";
+  if (normalized.includes("pressure relief valve")) return "Relief valve leak help";
+  if (normalized.includes("leaking")) return "Leak help";
+  if (normalized.includes("no hot water")) return "Outage help";
+  if (normalized.includes("not working")) return "No-heat troubleshooting";
+  if (normalized.includes("gas")) return "Gas unit repair";
+  if (normalized.includes("electric")) return "Electric unit repair";
+  return "Repair";
 }
 
 function uniqueBySlug(items: WaterHeaterPage[]) {
@@ -6024,7 +6041,7 @@ export function getCrossServiceLinksForCity(page: WaterHeaterPage, limit = 5) {
     .slice(0, limit)
     .map((item) => ({
       href: `/${item.slug}`,
-      anchor: `${toTitleCase(item.primaryKeyword)} ${area.city}`,
+      anchor: `${area.city} ${serviceTopicLabel(item).toLowerCase()}`,
     }));
 }
 
@@ -6122,6 +6139,21 @@ export function buildH1(page: WaterHeaterPage) {
   return `${toTitleCase(page.primaryKeyword)} in ${area.label}`;
 }
 
+export function buildServiceLinkLabel(page: WaterHeaterPage) {
+  const area = parseArea(page.targetArea);
+  const topic = serviceTopicLabel(page);
+
+  if (area.kind === "national") {
+    return `${topic} guide`;
+  }
+
+  if (area.kind === "city") {
+    return `${area.city} ${topic.toLowerCase()}`;
+  }
+
+  return `${area.label} ${topic.toLowerCase()}`;
+}
+
 export function buildIntroParagraph(page: WaterHeaterPage) {
   const area = locationToken(page);
   const concernOpeners = [
@@ -6140,7 +6172,7 @@ export function buildIntroParagraph(page: WaterHeaterPage) {
 
   const budgetLine =
     page.cpc > 0
-      ? `Keyword market data around ${formatMoney(page.cpc)} per lead shows how competitive this service is, but final cost still depends on tank type, venting, parts availability, and in-home access.`
+      ? `Local demand can affect scheduling pressure, but final cost still depends on tank type, venting, parts availability, and in-home access.`
       : "Pricing is best confirmed during inspection because tank type, access, and code upgrades can change the final quote.";
 
   const closeLines = [
@@ -6159,34 +6191,32 @@ export function buildIntroParagraph(page: WaterHeaterPage) {
 }
 
 export function buildKeywordSentence(page: WaterHeaterPage) {
+  const area = locationToken(page);
   if (page.secondaryKeywords.length === 0) {
-    return `Homeowners searching ${page.primaryKeyword} usually need quick diagnostics, safe repair planning, and a clear path to reliable hot water.`;
+    return `Most visitors here need quick diagnostics, safe planning, and a clear path to reliable hot water in ${area}.`;
   }
 
-  const related = page.secondaryKeywords.slice(0, 3).join(", ");
-  return `People comparing ${page.primaryKeyword} often also review ${related} before choosing a same-day repair or replacement plan.`;
+  return `Related searches can point to urgency, system type, and nearby availability before choosing a same-day repair or replacement plan.`;
 }
 
 export function buildFaqs(page: WaterHeaterPage) {
   const area = locationToken(page);
-  const keyword = page.primaryKeyword;
-  const timingHint = page.pageType.toLowerCase();
 
   return [
     {
-      question: `How fast can ${keyword} appointments be arranged in ${area}?`,
-      answer: `Dispatch availability changes by demand, but phone triage starts immediately and helps route your ${timingHint} request to the right technician without delay.`,
+      question: `How fast can appointments be arranged in ${area}?`,
+      answer: "Dispatch availability changes by demand, but phone triage starts immediately and helps route your request to the right technician without delay.",
     },
     {
-      question: `What affects final pricing for ${keyword} work in ${area}?`,
+      question: `What affects final pricing in ${area}?`,
       answer: "Final pricing depends on heater type, venting setup, code-required upgrades, parts availability, and whether the job is a repair, full replacement, or installation conversion.",
     },
     {
-      question: `Should I repair or replace first when searching ${keyword} in ${area}?`,
+      question: "Should I repair or replace first?",
       answer: "Technicians usually compare unit age, failure history, and safety condition first, then recommend repair when practical or replacement when reliability risk stays high.",
     },
     {
-      question: `Is there a safer way to reduce downtime for ${keyword} projects?`,
+      question: "Is there a safer way to reduce downtime?",
       answer: "Yes. Early symptom notes, photos of the current tank label, and clear access to the mechanical area usually speed diagnostics and shorten total disruption time.",
     },
   ];
